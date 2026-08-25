@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SaaS Implementation Ops</title>
+  <style>
+    :root{font-family:Inter,system-ui;background:#0b1220;color:#e8eef8}body{max-width:1180px;margin:auto;padding:32px}h1{margin-bottom:4px}.muted{color:#91a0b7}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0}.card,table{background:#111c2e;border:1px solid #22324b;border-radius:12px}.card{padding:18px}.value{font-size:28px;font-weight:800;color:#4fe1a1}table{width:100%;border-collapse:collapse;overflow:hidden}th,td{text-align:left;padding:14px;border-bottom:1px solid #22324b}th{color:#91a0b7}button{background:#4fe1a1;border:0;padding:8px 12px;border-radius:7px;font-weight:700;cursor:pointer}.pill{padding:5px 9px;border-radius:99px;background:#233653} @media(max-width:760px){.grid{grid-template-columns:1fr 1fr}body{padding:18px}table{font-size:13px}}
+  </style>
+</head>
+<body>
+  <h1>Implementation Control Plane</h1><div class="muted">Customer onboarding, delivery risk and operational traceability</div>
+  <section class="grid" id="metrics"></section>
+  <table><thead><tr><th>Customer</th><th>Owner</th><th>Stage</th><th>Go-live</th><th>Value</th><th></th></tr></thead><tbody id="customers"></tbody></table>
+  <script>
+    const stages=['discovery','data_validation','configuration','uat','go_live','hypercare','complete'];
+    async function load(){
+      const [m,c]=await Promise.all([fetch('/api/dashboard').then(r=>r.json()),fetch('/api/customers').then(r=>r.json())]);
+      metrics.innerHTML=[['Customers',m.total_customers],['Active',m.active_implementations],['At risk',m.at_risk],['Contract value','$'+m.total_contract_value.toLocaleString()]].map(([k,v])=>`<div class="card"><div class="muted">${k}</div><div class="value">${v}</div></div>`).join('');
+      customers.innerHTML=c.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.owner}</td><td><span class="pill">${x.stage}</span></td><td>${new Date(x.target_go_live).toLocaleDateString()}</td><td>$${x.contract_value.toLocaleString()}</td><td>${x.stage==='complete'?'':`<button onclick="advance(${x.id},'${x.stage}')">Advance</button>`}</td></tr>`).join('');
+    }
+    async function advance(id,current){const stage=stages[stages.indexOf(current)+1];const r=await fetch(`/api/customers/${id}/transition`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({stage,actor:'Portfolio demo',note:'Milestone approved'})});if(!r.ok)alert((await r.json()).detail);load()};load();
+  </script>
+</body></html>
+
