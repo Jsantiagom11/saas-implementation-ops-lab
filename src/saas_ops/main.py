@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import FileResponse
 
+from .config import RiskThresholds
 from .database import initialize
 from .models import AuditEvent, Customer, CustomerCreate, Dashboard, TransitionRequest
 from .service import (
@@ -19,6 +20,7 @@ from .service import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    RiskThresholds.from_env()
     initialize()
     yield
 

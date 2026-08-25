@@ -19,6 +19,7 @@ Implementation teams often manage critical delivery state across spreadsheets, c
 - SQLite persistence with transactions and foreign keys
 - Audit history for operational accountability
 - Portfolio and adoption dashboard
+- UTC-normalized, configurable SLA and go-live risk scoring with reason codes
 - Responsive, dependency-free web interface
 - Typed API contracts and automated lifecycle tests
 
@@ -48,6 +49,18 @@ uvicorn saas_ops.main:app --reload
 
 Open `http://127.0.0.1:8000`. Interactive API documentation is available at `/docs`.
 
+Risk thresholds are configured at startup. Invalid or reversed values fail fast:
+
+| Environment variable | Default | Constraint |
+|---|---:|---|
+| `SAAS_OPS_STAGE_WARNING_HOURS` | `48` | Integer >= 0 |
+| `SAAS_OPS_STAGE_BREACH_HOURS` | `72` | Integer > stage warning |
+| `SAAS_OPS_GO_LIVE_WARNING_HOURS` | `168` | Integer >= 0 |
+
+API timestamps must include a timezone offset and are normalized to UTC for exact-duration
+comparisons. Risk is recalculated on reads; `risk_reasons[].code` is the stable integration
+contract and human-readable messages are presentation text.
+
 Create the first implementation:
 
 ```bash
@@ -76,7 +89,7 @@ This runs Ruff, strict mypy and pytest. No credentials or external services are 
 ## Roadmap
 
 - CSV data-import validation and error reports
-- Configurable SLAs and automated risk scoring
+- Per-stage SLA policies and escalation notifications
 - Role-based access control
 - Webhooks for CRM and messaging integrations
 - OpenTelemetry metrics and structured logs

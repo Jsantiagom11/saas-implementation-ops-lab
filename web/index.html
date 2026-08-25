@@ -10,15 +10,14 @@
 <body>
   <h1>Implementation Control Plane</h1><div class="muted">Customer onboarding, delivery risk and operational traceability</div>
   <section class="grid" id="metrics"></section>
-  <table><thead><tr><th>Customer</th><th>Owner</th><th>Stage</th><th>Go-live</th><th>Value</th><th></th></tr></thead><tbody id="customers"></tbody></table>
+  <table><thead><tr><th>Customer</th><th>Owner</th><th>Stage</th><th>Risk</th><th>Go-live</th><th>Value</th><th></th></tr></thead><tbody id="customers"></tbody></table>
   <script>
     const stages=['discovery','data_validation','configuration','uat','go_live','hypercare','complete'];
     async function load(){
       const [m,c]=await Promise.all([fetch('/api/dashboard').then(r=>r.json()),fetch('/api/customers').then(r=>r.json())]);
       metrics.innerHTML=[['Customers',m.total_customers],['Active',m.active_implementations],['At risk',m.at_risk],['Contract value','$'+m.total_contract_value.toLocaleString()]].map(([k,v])=>`<div class="card"><div class="muted">${k}</div><div class="value">${v}</div></div>`).join('');
-      customers.innerHTML=c.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.owner}</td><td><span class="pill">${x.stage}</span></td><td>${new Date(x.target_go_live).toLocaleDateString()}</td><td>$${x.contract_value.toLocaleString()}</td><td>${x.stage==='complete'?'':`<button onclick="advance(${x.id},'${x.stage}')">Advance</button>`}</td></tr>`).join('');
+      customers.innerHTML=c.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.owner}</td><td><span class="pill">${x.stage}</span></td><td><span class="pill">${x.risk}</span><div class="muted">${x.risk_reasons.map(r=>r.message).join('<br>')}</div></td><td>${new Date(x.target_go_live).toLocaleDateString()}</td><td>$${x.contract_value.toLocaleString()}</td><td>${x.stage==='complete'?'':`<button onclick="advance(${x.id},'${x.stage}')">Advance</button>`}</td></tr>`).join('');
     }
     async function advance(id,current){const stage=stages[stages.indexOf(current)+1];const r=await fetch(`/api/customers/${id}/transition`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({stage,actor:'Portfolio demo',note:'Milestone approved'})});if(!r.ok)alert((await r.json()).detail);load()};load();
   </script>
 </body></html>
-
