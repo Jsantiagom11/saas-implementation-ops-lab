@@ -1,0 +1,23 @@
+name: Product improvement
+description: Propose a measurable implementation-operations improvement
+title: "feat: "
+body:
+  - type: textarea
+    attributes:
+      label: Operational problem
+      description: Describe the workflow failure, delay or control gap.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected outcome
+      description: State the observable business result.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Acceptance criteria
+      description: List testable conditions for completion.
+    validations:
+      required: true
+
