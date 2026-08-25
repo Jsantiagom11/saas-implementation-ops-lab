@@ -6,6 +6,8 @@
 
 An executable portfolio case study that models the operational control plane behind a SaaS implementation: customer onboarding, governed stage transitions, delivery metrics and an immutable audit trail.
 
+**[Read the business and engineering case study →](docs/case-study.md)**
+
 ## Why this exists
 
 Implementation teams often manage critical delivery state across spreadsheets, chat and CRM notes. This project demonstrates how to turn that fragmented workflow into a small, auditable product with explicit business rules.
