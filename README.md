@@ -1,5 +1,9 @@
 # SaaS Implementation Operations Lab
 
+[![Quality](https://github.com/Jsantiagom11/saas-implementation-ops-lab/actions/workflows/quality.yml/badge.svg)](https://github.com/Jsantiagom11/saas-implementation-ops-lab/actions/workflows/quality.yml)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
+![License](https://img.shields.io/badge/license-MIT-4fe1a1)
+
 An executable portfolio case study that models the operational control plane behind a SaaS implementation: customer onboarding, governed stage transitions, delivery metrics and an immutable audit trail.
 
 ## Why this exists
@@ -75,7 +79,8 @@ This runs Ruff, strict mypy and pytest. No credentials or external services are 
 - Webhooks for CRM and messaging integrations
 - OpenTelemetry metrics and structured logs
 
+See [CHANGELOG.md](CHANGELOG.md) for released capabilities and evolution.
+
 ## Professional context
 
 Built as a product-engineering case study at the intersection of SaaS implementation, operational delivery, workflow automation and troubleshooting.
-
