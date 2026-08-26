@@ -1,12 +1,15 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import FileResponse
 
+from .config import RiskThresholds
 from .database import initialize
 from .models import AuditEvent, Customer, CustomerCreate, Dashboard, TransitionRequest
 from .service import (
+    ConcurrentUpdateError,
     CustomerNotFoundError,
     InvalidTransitionError,
     audit_log,
@@ -19,6 +22,7 @@ from .service import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    RiskThresholds.from_env()
     initialize()
     yield
 
@@ -28,7 +32,7 @@ app = FastAPI(title="SaaS Implementation Operations Lab", version="0.1.0", lifes
 
 @app.get("/", include_in_schema=False)
 def index() -> FileResponse:
-    return FileResponse("web/index.html")
+    return FileResponse(Path(__file__).resolve().parents[2] / "web" / "index.html")
 
 
 @app.get("/health")
@@ -49,10 +53,18 @@ def customers() -> list[Customer]:
 @app.post("/api/customers/{customer_id}/transition", response_model=Customer)
 def move_customer(customer_id: int, payload: TransitionRequest) -> Customer:
     try:
-        return transition(customer_id, payload.stage, payload.actor, payload.note)
+        return transition(
+            customer_id,
+            payload.stage,
+            payload.actor,
+            payload.note,
+            payload.expected_version,
+        )
     except CustomerNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Customer not found") from exc
     except InvalidTransitionError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ConcurrentUpdateError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
