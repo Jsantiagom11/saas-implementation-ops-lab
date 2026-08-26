@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -24,7 +25,7 @@ class CustomerCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     owner: str = Field(min_length=2, max_length=120)
     target_go_live: datetime
-    contract_value: float = Field(ge=0)
+    contract_value: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
 
     @field_validator("target_go_live")
     @classmethod
@@ -49,6 +50,7 @@ class RiskAssessment(BaseModel):
 class Customer(CustomerCreate):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    version: int = Field(ge=0)
     stage: Stage
     risk: Risk
     risk_reasons: list[RiskReason] = Field(default_factory=list)
@@ -65,6 +67,7 @@ class Customer(CustomerCreate):
 
 class TransitionRequest(BaseModel):
     stage: Stage
+    expected_version: int = Field(ge=0)
     actor: str = Field(min_length=2, max_length=120)
     note: str = Field(default="", max_length=500)
 
@@ -82,5 +85,5 @@ class Dashboard(BaseModel):
     total_customers: int
     active_implementations: int
     at_risk: int
-    total_contract_value: float
+    total_contract_value: Decimal
     stage_counts: dict[str, int]

@@ -17,11 +17,13 @@ Implementation teams often manage critical delivery state across spreadsheets, c
 - Customer implementation pipeline from discovery to hypercare
 - Guarded transitions that prevent skipped delivery gates
 - SQLite persistence with transactions and foreign keys
+- WAL mode, bounded lock waiting and optimistic version checks
 - Audit history for operational accountability
 - Portfolio and adoption dashboard
 - UTC-normalized, configurable SLA and go-live risk scoring with reason codes
 - Responsive, dependency-free web interface
 - Typed API contracts and automated lifecycle tests
+- Integer-cent money storage with exact decimal API totals
 
 ## Architecture
 
@@ -58,8 +60,12 @@ Risk thresholds are configured at startup. Invalid or reversed values fail fast:
 | `SAAS_OPS_GO_LIVE_WARNING_HOURS` | `168` | Integer >= 0 |
 
 API timestamps must include a timezone offset and are normalized to UTC for exact-duration
-comparisons. Risk is recalculated on reads; `risk_reasons[].code` is the stable integration
+comparisons. Future stage timestamps surface a high-risk data-quality reason instead of being
+silently clamped. Risk is recalculated on reads; `risk_reasons[].code` is the stable integration
 contract and human-readable messages are presentation text.
+
+Transitions require the customer's current `version`. A stale request returns HTTP `409`
+instead of overwriting a newer milestone.
 
 Create the first implementation:
 
@@ -75,13 +81,18 @@ curl -X POST http://127.0.0.1:8000/api/customers \
 make check
 ```
 
-This runs Ruff, strict mypy and pytest. No credentials or external services are needed.
+This runs Ruff, strict mypy and pytest. No credentials or external services are needed. The
+suite includes exact SLA boundaries, timezone equivalence, invalid configuration, schema
+migration, concurrent transitions, SQLite pragmas, stale API requests, exact money totals and
+web-output escaping. See [Rainy-day testing](docs/rainy-day-testing.md).
 
 ## Decisions and trade-offs
 
 | Decision | Rationale | Production evolution |
 |---|---|---|
-| SQLite | Zero-friction local evaluation | PostgreSQL + migrations |
+| SQLite + WAL | Zero-friction evaluation with deterministic write contention | PostgreSQL for multi-instance deployment |
+| Optimistic versions | Rejects stale stage transitions | ETag/idempotency contracts at integration boundaries |
+| Integer cents | Exact financial totals | Currency-aware money type for multi-currency accounts |
 | Sequential stages | Makes governance visible | Configurable workflows |
 | Synchronous API | Appropriate for current workload | Task queue for imports |
 | Vanilla dashboard | Keeps the case inspectable | Component UI if scope grows |

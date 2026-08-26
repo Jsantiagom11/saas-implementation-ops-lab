@@ -25,6 +25,7 @@ def test_customer_lifecycle(tmp_path, monkeypatch) -> None:
             f"/api/customers/{customer['id']}/transition",
             json={
                 "stage": "data_validation",
+                "expected_version": customer["version"],
                 "actor": "Jorge Santiago",
                 "note": "Discovery signed",
             },
@@ -44,7 +45,8 @@ def test_transition_cannot_skip_stage(tmp_path, monkeypatch) -> None:
         ).json()
         response = client.post(
             f"/api/customers/{customer['id']}/transition",
-            json={"stage": "go_live", "actor": "Jorge Santiago", "note": "Unsafe shortcut"},
+            json={"stage": "go_live", "expected_version": customer["version"],
+                  "actor": "Jorge Santiago", "note": "Unsafe shortcut"},
         )
         assert response.status_code == 409
 

@@ -19,6 +19,7 @@ def customer(
 ) -> Customer:
     return Customer(
         id=1,
+        version=0,
         name="Andes Telecom",
         owner="Jorge Santiago",
         target_go_live=NOW + target_delta,
@@ -180,10 +181,10 @@ def test_invalid_environment_integer_fails(monkeypatch: pytest.MonkeyPatch) -> N
         RiskThresholds.from_env()
 
 
-def test_future_stage_timestamp_does_not_create_negative_observation() -> None:
+def test_future_stage_timestamp_surfaces_data_quality_risk() -> None:
     assessment = score_risk(
         customer(age=-timedelta(hours=1)), now=NOW, thresholds=DEFAULTS
     )
 
-    assert assessment.risk == Risk.LOW
-    assert assessment.reasons == []
+    assert assessment.risk == Risk.HIGH
+    assert [reason.code for reason in assessment.reasons] == ["stage_timestamp_in_future"]
