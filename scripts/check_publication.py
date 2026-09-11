@@ -8,14 +8,38 @@ SELF = "scripts/check_publication.py"
 
 PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("unix home path", re.compile(r"/home/[A-Za-z0-9._-]+/")),
-    ("windows user path", re.compile(r"[A-Za-z]:\\\\Users\\\\[^\\\\\r\n]+\\\\")),
-    ("private key", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")),
+    (
+        "windows user path",
+        re.compile(r"[A-Za-z]:\\\\Users\\\\[^\\\\\r\n]+\\\\"),
+    ),
+    (
+        "private key",
+        re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
+    ),
     ("OpenAI-style secret", re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b")),
-    ("GitHub token", re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b")),
+    (
+        "GitHub token",
+        re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b"),
+    ),
     ("Google API key", re.compile(r"\bAIza[0-9A-Za-z_-]{30,}\b")),
-    ("personal email", re.compile(r"\b[A-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo)\.[A-Z]{2,}\b", re.I)),
-    ("agent handoff context", re.compile(r"\b(?:authorized by the handoff|task-supplied|user-reported commit)\b", re.I)),
-    ("agent workspace context", re.compile(r"Applicable `?AGENTS\.md`?.*parent workspace", re.I)),
+    (
+        "personal email",
+        re.compile(
+            r"\b[A-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo)\.[A-Z]{2,}\b",
+            re.I,
+        ),
+    ),
+    (
+        "agent handoff context",
+        re.compile(
+            r"\b(?:authorized by the handoff|task-supplied|user-reported commit)\b",
+            re.I,
+        ),
+    ),
+    (
+        "agent workspace context",
+        re.compile(r"Applicable `?AGENTS\.md`?.*parent workspace", re.I),
+    ),
 )
 
 
