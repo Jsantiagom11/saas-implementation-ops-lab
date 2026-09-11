@@ -4,7 +4,7 @@
 
 This portfolio system demonstrates how an implementation team can replace fragmented status tracking with a governed customer-onboarding workflow. It makes delivery stages, ownership, contract exposure and operational history visible through one lightweight control plane.
 
-The project is intentionally scoped as an executable product case—not presented as a deployed OpenLoop or client system.
+The project is intentionally scoped as an executable portfolio case and is not presented as a deployed client system.
 
 ## Problem
 
@@ -60,4 +60,3 @@ The application provides:
 ## Next measurable increment
 
 [Issue #1](https://github.com/Jsantiagom11/saas-implementation-ops-lab/issues/1) introduces deterministic SLA risk scoring, risk reasons and boundary tests.
-
